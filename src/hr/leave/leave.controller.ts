@@ -1,8 +1,18 @@
-import { Controller, Get, Query, UseGuards, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Param,
+  Patch,
+  Body,
+  Req,
+} from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorator/roles.decorator';
+import { UpdateLeaveStatusDto } from './dto/update-leave-status.dto';
 
 @Controller('hr/leave')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -26,5 +36,19 @@ export class LeaveController {
   @Roles('hr', 'admin')
   getLeaveDetail(@Param('id') id: string) {
     return this.leaveService.getLeaveDetail(id);
+  }
+
+  @Patch(':id/status')
+  @Roles('hr', 'admin')
+  updateLeaveStatus(
+    @Param('id') id: string,
+    @Body() updateLeaveStatusDto: UpdateLeaveStatusDto,
+    @Req() req,
+  ) {
+    return this.leaveService.updateLeaveStatus(
+      id,
+      updateLeaveStatusDto.leave_status,
+      req.user.id,
+    );
   }
 }

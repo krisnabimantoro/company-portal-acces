@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -122,6 +126,45 @@ export class LeaveService {
     return {
       message: 'Leave detail retrieved successfully',
       data: leave,
+    };
+  }
+
+  async updateLeaveStatus(
+    leaveId: string,
+    newStatus: string,
+    hrUserId: string,
+  ) {
+    // Check if leave exists
+    const leave = await this.prismaService.leave.findFirst({
+      where: {
+        id: leaveId,
+        deleted_at: null,
+      },
+    });
+
+    if (!leave) {
+      throw new NotFoundException('Leave request not found');
+    }
+
+    // Validate status value
+    const validStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
+    if (!validStatuses.includes(newStatus)) {
+      throw new BadRequestException(
+        `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+      );
+    }
+
+    // Update leave status and set HR user
+    await this.prismaService.leave.update({
+      where: { id: leaveId },
+      data: {
+        leave_status: newStatus as any,
+        user_hr_id: hrUserId,
+      },
+    });
+
+    return {
+      message: `Leave request ${newStatus.toLowerCase()} successfully`,
     };
   }
 }
