@@ -72,4 +72,24 @@ export class LeaveController {
   getLeaveDetail(@Param('id') id: string, @Req() req) {
     return this.leaveService.getLeaveDetail(id, req.user.id);
   }
+
+  @Patch(':id')
+  @Roles('employee', 'admin', 'hr')
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  updateLeave(
+    @Param('id') id: string,
+    @Body() updateLeaveDto: UpdateLeaveDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req,
+  ) {
+    const fileUrl = file
+      ? `/uploads/leave-attachments/${file.filename}`
+      : undefined;
+    return this.leaveService.updateLeave(
+      id,
+      req.user.id,
+      updateLeaveDto,
+      fileUrl,
+    );
+  }
 }

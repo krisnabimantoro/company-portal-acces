@@ -156,4 +156,90 @@ export class LeaveService {
       data: leave,
     };
   }
+
+  async updateLeave(
+    leaveId: string,
+    userId: string,
+    updateLeaveDto: UpdateLeaveDto,
+    fileUrl?: string,
+  ) {
+    const existingLeave = await this.prismaService.leave.findFirst({
+      where: {
+        id: leaveId,
+        user_employee_id: userId,
+        deleted_at: null,
+      },
+    });
+
+    if (!existingLeave) {
+      throw new NotFoundException(
+        'Leave request not found or you are not authorized to update it',
+      );
+    }
+
+    // Check if leave status is PENDING
+    if (existingLeave.leave_status !== 'PENDING') {
+      throw new BadRequestException(
+        `Cannot update leave request with status ${existingLeave.leave_status}. Only PENDING leave requests can be updated`,
+      );
+    }
+
+    // Validate and convert dates
+    let fromDate: Date | undefined;
+    let untilDate: Date | undefined;
+
+    if (updateLeaveDto.from_date) {
+      fromDate = new Date(updateLeaveDto.from_date);
+      if (isNaN(fromDate.getTime())) {
+        throw new BadRequestException('Invalid from_date format');
+      }
+    }
+
+    if (updateLeaveDto.until_date) {
+      untilDate = new Date(updateLeaveDto.until_date);
+      if (isNaN(untilDate.getTime())) {
+        throw new BadRequestException('Invalid until_date format');
+      }
+    }
+
+    // Validate date range
+    const finalFromDate = fromDate || existingLeave.from_date;
+    const finalUntilDate = untilDate || existingLeave.until_date;
+
+    if (finalFromDate > finalUntilDate) {
+      throw new BadRequestException(
+        'From date must be before or equal to until date',
+      );
+    }
+
+    // Update leave using dto fields directly
+    const updatedLeave = await this.prismaService.leave.update({
+      where: { id: leaveId },
+      data: {
+        ...(updateLeaveDto.leave_type && {
+          leave_type: updateLeaveDto.leave_type,
+        }),
+        ...(fromDate && { from_date: fromDate }),
+        ...(untilDate && { until_date: untilDate }),
+        ...(updateLeaveDto.note !== undefined && { note: updateLeaveDto.note }),
+        ...(fileUrl !== undefined && { file_url: fileUrl }),
+      },
+      select: {
+        id: true,
+        leave_type: true,
+        leave_status: true,
+        from_date: true,
+        until_date: true,
+        note: true,
+        file_url: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    return {
+      message: 'Leave request updated successfully',
+      data: updatedLeave,
+    };
+  }
 }
