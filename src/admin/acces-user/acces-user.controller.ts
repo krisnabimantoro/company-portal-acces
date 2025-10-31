@@ -21,11 +21,6 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 export class AccesUserController {
   constructor(private readonly accesUserService: AccesUserService) {}
 
-  @Post()
-  create(@Body() createAccesUserDto: CreateAccesUserDto) {
-    return this.accesUserService.create(createAccesUserDto);
-  }
-
   @Get('list-users')
   @Roles('admin')
   findAll(
@@ -36,23 +31,5 @@ export class AccesUserController {
     const pageNumber = page ? parseInt(page, 10) : 1;
     const limitNumber = limit ? parseInt(limit, 10) : 10;
     return this.accesUserService.findAll(pageNumber, limitNumber, search);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.accesUserService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAccesUserDto: UpdateAccesUserDto,
-  ) {
-    return this.accesUserService.update(+id, updateAccesUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.accesUserService.remove(+id);
   }
 }

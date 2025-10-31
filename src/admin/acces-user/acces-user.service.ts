@@ -8,9 +8,6 @@ import { Prisma } from '@prisma/client';
 export class AccesUserService {
   constructor(private prismaService: PrismaService) {}
 
-  create(createAccesUserDto: CreateAccesUserDto) {
-    return 'This action adds a new accesUser';
-  }
 
   async findAll(page: number = 1, limit: number = 10, search?: string) {
     // Ensure page and limit are positive numbers
@@ -94,17 +91,5 @@ export class AccesUserService {
         hasPreviousPage,
       },
     };
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} accesUser`;
-  }
-
-  update(id: number, updateAccesUserDto: UpdateAccesUserDto) {
-    return `This action updates a #${id} accesUser`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} accesUser`;
   }
 }
