@@ -29,6 +29,20 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
+
+    if (userDto.phone_number) {
+      const existingPhone = await this.prismaService.user.findUnique({
+        where: {
+          phone_number: userDto.phone_number,
+        },
+      });
+      if (existingPhone) {
+        throw new ConflictException(
+          'User with this phone number already exists',
+        );
+      }
+    }
+
     const saltOrRounds = 10;
     const password = userDto.password;
     const hash = await bcrypt.hash(password, saltOrRounds);
