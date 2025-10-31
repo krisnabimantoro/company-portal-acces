@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { AccesUserModule } from './admin/acces-user/acces-user.module';
 import { EmployeeController } from './employee/employee.controller';
 import { EmployeeModule } from './employee/employee.module';
+import { HrModule } from './hr/hr.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { EmployeeModule } from './employee/employee.module';
     AuthModule,
     AccesUserModule,
     EmployeeModule,
+    HrModule,
   ],
   controllers: [AppController],
   providers: [AppService],
