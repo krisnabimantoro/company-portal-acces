@@ -48,6 +48,10 @@ model User {
     announcements     Announcement[]       @relation("HrAnnouncements")
     announcementReads AnnouncementReadBy[] @relation("EmployeeReads")
 
+    // indexes for performance
+    @@index([deleted_at])
+    @@index([full_name])
+    @@index([created_at])
     @@map("users")
 }
 
