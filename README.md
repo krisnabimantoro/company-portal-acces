@@ -16,6 +16,13 @@ Functional req, ERD dan information architecture
 https://www.tldraw.com/f/VWXrlQslvjzNJV5-Fm_QY?d=v-904.505.2519.1468.U4OROQrJibCah1S_ApibX
 
 
+## API Dokumentasi
+
+Postman API
+https://www.postman.com/api-kyuu/workspace/dot-backend-internship/collection/12622474-2cfd23b4-f593-4c3a-95ab-82cd5bece03e?action=share&creator=12622474&active-environment=12622474-41ef4fe6-f34d-4ab3-9c72-37dac21cbd07
+
+https://documenter.getpostman.com/view/12622474/2sB3Wny38d#af09ae4e-af52-48b7-bfb2-3b4e163f8fd8
+
 ## 🚀 Fitur Utama
 
 ### 🔐 Authentication & Authorization
