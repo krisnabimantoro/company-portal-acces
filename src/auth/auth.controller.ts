@@ -11,6 +11,7 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -25,11 +26,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Throttle({ short: { limit: 3, ttl: 60000 } }) // 3 requests per minute for register
   async register(@Body() userDto: UserDto) {
     return this.authService.register(userDto);
   }
 
   @Post('login')
+  @Throttle({ short: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,

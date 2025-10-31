@@ -14,6 +14,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { LeaveService } from './leave.service';
 import { CreateLeaveDto } from './dto/create-leave.dto';
 import { UpdateLeaveDto } from './dto/update-leave.dto';
@@ -29,6 +30,7 @@ export class LeaveController {
 
   @Post()
   @Roles('employee', 'admin', 'hr')
+  @Throttle({ short: { limit: 5, ttl: 60000 } }) // 5 leave requests per minute
   @UseInterceptors(FileInterceptor('file', multerConfig))
   create(
     @Body() createLeaveDto: CreateLeaveDto,

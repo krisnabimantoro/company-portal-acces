@@ -11,6 +11,7 @@ import {
   Query,
   BadRequestException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AnnouncementService } from './announcement.service';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
@@ -25,6 +26,7 @@ export class AnnouncementController {
 
   @Post()
   @Roles('hr', 'admin')
+  @Throttle({ short: { limit: 10, ttl: 60000 } }) // 10 announcements per minute
   create(@Body() createAnnouncementDto: CreateAnnouncementDto, @Req() req) {
     if (!createAnnouncementDto.announcement_type) {
       throw new BadRequestException('announcement_type is required');
