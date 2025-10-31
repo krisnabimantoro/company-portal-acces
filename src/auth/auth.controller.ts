@@ -57,10 +57,7 @@ export class AuthController {
   }
 
   @Post('refresh')
-  async refreshToken(
-    @Req() req,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async refreshToken(@Req() req, @Res({ passthrough: true }) res: Response) {
     // Try to get refresh token from body, or from cookie
     const refreshToken = req.cookies?.[jwtConstants.refreshTokenCookieName];
 
@@ -116,30 +113,5 @@ export class AuthController {
     return {
       message: 'Logout successful',
     };
-  }
-
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
   }
 }
