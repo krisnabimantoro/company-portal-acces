@@ -23,7 +23,7 @@ COPY prisma ./prisma
 RUN npx prisma generate
 
 # Build the application and verify it exists
-RUN pnpm build && ls -la dist/ && ls -la dist/src/
+RUN pnpm build 
 
 # Expose the port the app runs on
 EXPOSE 3040
