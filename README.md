@@ -6,6 +6,16 @@ Backend API untuk sistem manajemen portal perusahaan yang dibangun dengan NestJS
 
 Company Portal Access adalah REST API yang menyediakan sistem autentikasi, manajemen karyawan, cuti, dan pengumuman untuk portal perusahaan. Aplikasi ini dilengkapi dengan fitur keamanan seperti JWT authentication, CSRF protection, dan rate limiting.
 
+## Pattern Project
+
+Pattern yang biasa saya gunakan adalah menggunakan Modular Architecture, dengan konsep OOP jadi saya biasa menggunakan fitur module pattern dari behaviornya nestjs
+
+## Dokumentasi Architecture
+
+Functional req, ERD dan information architecture
+https://www.tldraw.com/f/VWXrlQslvjzNJV5-Fm_QY?d=v-904.505.2519.1468.U4OROQrJibCah1S_ApibX
+
+
 ## 🚀 Fitur Utama
 
 ### 🔐 Authentication & Authorization
@@ -557,11 +567,3 @@ Dokumentasi lengkap tersedia di folder `docs/`:
 
 - **Developer**: Krisna Bimantoro
 - **Repository**: [github.com/krisnabimantoro/company-portal-acces](https://github.com/krisnabimantoro/company-portal-acces)
-
-## 📞 Support
-
-Untuk pertanyaan atau issue, silakan buat issue di GitHub repository atau hubungi tim development.
-
----
-
-**Built with ❤️ using NestJS**
