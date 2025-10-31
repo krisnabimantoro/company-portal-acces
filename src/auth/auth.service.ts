@@ -8,8 +8,10 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserDto } from './dto/user.dto';
 import { LoginDto } from './dto/login.dto';
+
 import { PrismaService } from 'src/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { jwtConstants } from './lib/constant';
 
 @Injectable()
 export class AuthService {
@@ -87,7 +89,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      roles: userRoles, 
+      roles: userRoles,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -109,6 +111,74 @@ export class AuthService {
         roles: userRoles,
       },
     };
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      // Verify the refresh token
+      const payload = this.jwtService.verify(refreshToken, {
+        secret:
+          jwtConstants.refreshSecret || process.env.JWT_REFRESH_SECRET_KEY,
+      });
+
+      // Get user from database to ensure user still exists and has valid roles
+      const user = await this.prismaService.user.findUnique({
+        where: { id: payload.sub },
+        include: {
+          roles: {
+            include: {
+              role: true,
+            },
+            where: {
+              deleted_at: null,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (!user.roles || user.roles.length === 0) {
+        throw new UnauthorizedException('User does not have any assigned role');
+      }
+
+      // Get updated user roles
+      const userRoles = user.roles.map((ur) => ur.role.name_role);
+
+      // Create new payload with updated roles
+      const newPayload = {
+        sub: user.id,
+        email: user.email,
+        roles: userRoles,
+      };
+
+      // Generate new access token
+      const accessToken = this.jwtService.sign(newPayload, {
+        expiresIn: '1h',
+      });
+
+      // Generate new refresh token
+      const newRefreshToken = this.jwtService.sign(newPayload, {
+        expiresIn: '7d',
+        secret:
+          jwtConstants.refreshSecret || process.env.JWT_REFRESH_SECRET_KEY,
+      });
+
+      return {
+        access_token: accessToken,
+        refresh_token: newRefreshToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          roles: userRoles,
+        },
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 
   create(createAuthDto: CreateAuthDto) {
