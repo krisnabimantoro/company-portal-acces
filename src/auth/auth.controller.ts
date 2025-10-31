@@ -6,11 +6,17 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
+  Req,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserDto } from './dto/user.dto';
+import { LoginDto } from './dto/login.dto';
+import { jwtConstants } from './lib/constant';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +25,33 @@ export class AuthController {
   @Post('register')
   async register(@Body() userDto: UserDto) {
     return this.authService.register(userDto);
+  }
+
+  @Post('login')
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.login(loginDto);
+
+    res.cookie(jwtConstants.accessTokenCookieName, result.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000, // 1 hour
+    });
+
+    res.cookie(jwtConstants.refreshTokenCookieName, result.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 604800000, // 7 days
+    });
+
+    return {
+      message: 'Login successful',
+      user: result.user,
+    };
   }
 
   @Post()
