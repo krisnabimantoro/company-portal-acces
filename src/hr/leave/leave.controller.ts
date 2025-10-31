@@ -7,6 +7,7 @@ import {
   Patch,
   Body,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { LeaveService } from './leave.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';

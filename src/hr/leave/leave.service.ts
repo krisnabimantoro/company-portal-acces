@@ -123,6 +123,17 @@ export class LeaveService {
       throw new NotFoundException('Leave request not found');
     }
 
+    if (leave.leave_status === 'PENDING') {
+      await this.prismaService.leave.update({
+        where: { id: leaveId },
+        data: {
+          leave_status: 'UNDER_REVIEW' as any,
+        },
+      });
+
+      leave.leave_status = 'UNDER_REVIEW' as any;
+    }
+
     return {
       message: 'Leave detail retrieved successfully',
       data: leave,
@@ -147,7 +158,7 @@ export class LeaveService {
     }
 
     // Validate status value
-    const validStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
+    const validStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'UNDER_REVIEW'];
     if (!validStatuses.includes(newStatus)) {
       throw new BadRequestException(
         `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
