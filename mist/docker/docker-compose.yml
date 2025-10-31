@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  app:
+    image: ${DOCKER_IMAGE}
+    container_name: company-portal-backend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3040}:3040"
+    env_file:
+      - /root/dot/.env
+    volumes:
+      - /root/dot/uploads:/usr/src/app/uploads
+    networks:
+      - company-portal-network
+
+networks:
+  company-portal-network:
+    driver: bridge

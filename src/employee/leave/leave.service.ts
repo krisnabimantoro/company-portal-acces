@@ -30,7 +30,7 @@ export class LeaveService {
       );
     }
 
-    const leave = await this.prismaService.leave.create({
+    await this.prismaService.leave.create({
       data: {
         user_employee_id: employeeId,
         leave_type: createLeaveDto.leave_type,
@@ -44,16 +44,6 @@ export class LeaveService {
 
     return {
       message: 'Leave request created successfully',
-      data: {
-        id: leave.id,
-        leave_type: leave.leave_type,
-        leave_status: leave.leave_status,
-        from_date: leave.from_date,
-        until_date: leave.until_date,
-        note: leave.note,
-        file_url: leave.file_url,
-        created_at: leave.created_at,
-      },
     };
   }
 
