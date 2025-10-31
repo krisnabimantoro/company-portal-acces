@@ -17,6 +17,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserDto } from './dto/user.dto';
 import { LoginDto } from './dto/login.dto';
 import { jwtConstants } from './lib/constant';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -52,6 +53,12 @@ export class AuthController {
       message: 'Login successful',
       user: result.user,
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getProfile(@Req() req) {
+    return req.user;
   }
 
   @Post()
