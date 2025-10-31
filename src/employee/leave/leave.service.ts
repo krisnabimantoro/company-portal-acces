@@ -232,4 +232,39 @@ export class LeaveService {
       data: updatedLeave,
     };
   }
+
+  async deleteLeave(leaveId: string, userId: string) {
+    const existingLeave = await this.prismaService.leave.findFirst({
+      where: {
+        id: leaveId,
+        user_employee_id: userId,
+        deleted_at: null,
+      },
+    });
+
+    if (!existingLeave) {
+      throw new NotFoundException(
+        'Leave request not found or you are not authorized to delete it',
+      );
+    }
+
+    // Check if leave status is PENDING
+    if (existingLeave.leave_status !== 'PENDING') {
+      throw new BadRequestException(
+        `Cannot delete leave request with status ${existingLeave.leave_status}. Only PENDING leave requests can be deleted`,
+      );
+    }
+
+    // Soft delete - update deleted_at timestamp
+    await this.prismaService.leave.update({
+      where: { id: leaveId },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+
+    return {
+      message: 'Leave request deleted successfully',
+    };
+  }
 }
