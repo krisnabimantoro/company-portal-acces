@@ -7,6 +7,7 @@ import {
 import { CreateAccesUserDto } from './dto/create-acces-user.dto';
 import { UpdateAccesUserDto } from './dto/update-acces-user.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { RemoveRoleDto } from './dto/remove-role.dto';
 import { PrismaService } from 'src/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -141,6 +142,45 @@ export class AccesUserService {
 
     return {
       message: 'Role assigned successfully',
+    };
+  }
+
+  async removeRole(removeRoleDto: RemoveRoleDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: removeRoleDto.user_id },
+      include: {
+        roles: {
+          where: { deleted_at: null },
+          include: { role: true },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.deleted_at) {
+      throw new BadRequestException('Cannot remove role from deleted user');
+    }
+
+    const userRole = user.roles.find(
+      (ur) => ur.role_id === removeRoleDto.role_id,
+    );
+
+    if (!userRole) {
+      throw new NotFoundException('User does not have this role');
+    }
+
+    await this.prismaService.userRole.update({
+      where: { id: userRole.id },
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+
+    return {
+      message: 'Role removed successfully',
     };
   }
 }

@@ -14,6 +14,7 @@ import { AccesUserService } from './acces-user.service';
 import { CreateAccesUserDto } from './dto/create-acces-user.dto';
 import { UpdateAccesUserDto } from './dto/update-acces-user.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { RemoveRoleDto } from './dto/remove-role.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorator/roles.decorator';
@@ -39,5 +40,11 @@ export class AccesUserController {
   @Roles('admin')
   assignRole(@Body() assignRoleDto: AssignRoleDto, @Req() req) {
     return this.accesUserService.assignRole(assignRoleDto, req.user.id);
+  }
+
+  @Delete('remove-role')
+  @Roles('admin')
+  removeRole(@Body() removeRoleDto: RemoveRoleDto) {
+    return this.accesUserService.removeRole(removeRoleDto);
   }
 }
