@@ -1,13 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateAccesUserDto } from './dto/create-acces-user.dto';
 import { UpdateAccesUserDto } from './dto/update-acces-user.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 import { PrismaService } from 'src/prisma.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AccesUserService {
   constructor(private prismaService: PrismaService) {}
-
 
   async findAll(page: number = 1, limit: number = 10, search?: string) {
     // Ensure page and limit are positive numbers
@@ -90,6 +95,58 @@ export class AccesUserService {
         hasNextPage,
         hasPreviousPage,
       },
+    };
+  }
+
+  async assignRole(assignRoleDto: AssignRoleDto, adminUserId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: assignRoleDto.user_id },
+      include: {
+        roles: {
+          where: { deleted_at: null },
+          include: { role: true },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.deleted_at) {
+      throw new BadRequestException('Cannot assign role to deleted user');
+    }
+
+    const role = await this.prismaService.role.findUnique({
+      where: { id: assignRoleDto.role_id },
+    });
+
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+
+    if (role.deleted_at) {
+      throw new BadRequestException('Cannot assign deleted role');
+    }
+
+    const existingRole = user.roles.find(
+      (ur) => ur.role_id === assignRoleDto.role_id,
+    );
+
+    if (existingRole) {
+      throw new ConflictException('User already has this role');
+    }
+
+    await this.prismaService.userRole.create({
+      data: {
+        user_id: assignRoleDto.user_id,
+        role_id: assignRoleDto.role_id,
+        create_by_user_id: adminUserId,
+      },
+    });
+
+    return {
+      message: 'Role assigned successfully',
     };
   }
 }
