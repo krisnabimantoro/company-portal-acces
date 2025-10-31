@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LeaveService } from './leave.service';
@@ -48,4 +49,27 @@ export class LeaveController {
     return this.leaveService.create(createLeaveDto, req.user.id, fileUrl);
   }
 
+  @Get('list')
+  @Roles('employee', 'admin', 'hr')
+  getMyLeaves(
+    @Req() req,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('status') status?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.leaveService.getMyLeaves(
+      req.user.id,
+      pageNum,
+      limitNum,
+      status,
+    );
+  }
+
+  @Get(':id')
+  @Roles('employee', 'admin', 'hr')
+  getLeaveDetail(@Param('id') id: string, @Req() req) {
+    return this.leaveService.getLeaveDetail(id, req.user.id);
+  }
 }
