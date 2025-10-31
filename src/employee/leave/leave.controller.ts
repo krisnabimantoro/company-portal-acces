@@ -94,4 +94,10 @@ export class LeaveController {
       fileUrl,
     );
   }
+
+  @Delete(':id')
+  @Roles('employee', 'admin', 'hr')
+  deleteLeave(@Param('id') id: string, @Req() req) {
+    return this.leaveService.deleteLeave(id, req.user.id);
+  }
 }
