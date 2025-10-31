@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UserDto } from './dto/user.dto';
@@ -16,7 +16,7 @@ export class AuthService {
       },
     });
     if (existingUser) {
-      throw new Error('User already exists');
+      throw new ConflictException('User with this email already exists');
     }
     const saltOrRounds = 10;
     const password = userDto.password;
