@@ -1,0 +1,163 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum LeaveType {
+    CUTI_TAHUNAN
+    CUTI_SAKIT
+    CUTI_TANPA_GAJI
+    LAINNYA
+}
+
+enum LeaveStatus {
+    PENDING
+    UNDER_REVIEW
+    APPROVED
+    REJECTED
+}
+
+enum AnnouncementType {
+    URGENT
+    DAILY
+}
+
+model User {
+    id           String  @id @default(uuid()) @db.Uuid
+    full_name    String
+    email        String  @unique
+    password     String
+    phone_number String? @unique
+
+    // timestamps (soft delete supported)
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
+    deleted_at DateTime?
+
+    // relations
+    roles        UserRole[]
+    createdRoles UserRole[] @relation("CreatorUserRoles")
+
+    leavesAsEmployee Leave[] @relation("EmployeeLeave")
+    leavesAsHR       Leave[] @relation("HrLeave")
+
+    announcements     Announcement[]       @relation("HrAnnouncements")
+    announcementReads AnnouncementReadBy[] @relation("EmployeeReads")
+
+    // indexes for performance
+    @@index([deleted_at])
+    @@index([full_name])
+    @@index([created_at])
+    @@map("users")
+}
+
+model Role {
+    id        Int    @id @default(autoincrement())
+    name_role String @unique
+
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
+    deleted_at DateTime?
+
+    users UserRole[]
+
+    @@map("role")
+}
+
+model UserRole {
+    id                String  @id @default(uuid()) @db.Uuid
+    user_id           String  @db.Uuid
+    role_id           Int
+    create_by_user_id String? @db.Uuid
+
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
+    deleted_at DateTime?
+
+    // relations
+    user      User  @relation(fields: [user_id], references: [id])
+    role      Role  @relation(fields: [role_id], references: [id])
+    createdBy User? @relation("CreatorUserRoles", fields: [create_by_user_id], references: [id])
+
+    @@unique([user_id, role_id])
+    // indexes for lookups & uniqueness
+    @@index([user_id])
+    @@index([role_id])
+    @@map("user_roles")
+}
+
+model Leave {
+    id               String      @id @default(uuid()) @db.Uuid
+    user_employee_id String      @db.Uuid
+    user_hr_id       String?     @db.Uuid
+    leave_type       LeaveType
+    leave_status     LeaveStatus @default(PENDING)
+    from_date        DateTime
+    until_date       DateTime
+    note             String
+    file_url         String?     @db.Text
+
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
+    deleted_at DateTime?
+
+    // relations
+    employee User  @relation("EmployeeLeave", fields: [user_employee_id], references: [id])
+    hr       User? @relation("HrLeave", fields: [user_hr_id], references: [id])
+
+    // filtering & FK indexes
+    @@index([user_employee_id])
+    @@index([user_hr_id])
+    @@index([leave_status])
+    @@index([user_employee_id, leave_status]) // common: "my leaves by status"
+    @@index([from_date, until_date]) // date-range queries
+    @@index([created_at])
+    @@index([deleted_at])
+    @@map("leave")
+}
+
+model Announcement {
+    id                String           @id @default(uuid()) @db.Uuid
+    user_hr_id        String           @db.Uuid
+    announcement_type AnnouncementType
+    title             String
+    note              String
+
+    created_at DateTime  @default(now())
+    updated_at DateTime  @updatedAt
+    deleted_at DateTime?
+
+    // relations
+    hr    User                 @relation("HrAnnouncements", fields: [user_hr_id], references: [id])
+    reads AnnouncementReadBy[]
+
+    // filtering & FK indexes
+    @@index([user_hr_id])
+    @@index([announcement_type])
+    @@index([announcement_type, created_at]) // "latest urgent", etc.
+    @@index([created_at])
+    @@index([deleted_at])
+    @@map("announcement")
+}
+
+model AnnouncementReadBy {
+    id               String   @id @default(uuid()) @db.Uuid
+    user_employee_id String   @db.Uuid
+    announcement_id  String   @db.Uuid
+    created_at       DateTime @default(now())
+
+    // relations
+    employee     User         @relation("EmployeeReads", fields: [user_employee_id], references: [id])
+    announcement Announcement @relation(fields: [announcement_id], references: [id])
+
+    // ensure one read record per user per announcement
+    @@unique([announcement_id, user_employee_id])
+    // lookups
+    @@index([user_employee_id])
+    @@index([announcement_id])
+    @@map("announcement_read_by")
+}
