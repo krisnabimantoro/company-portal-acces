@@ -8,7 +8,7 @@ Company Portal Access adalah REST API yang menyediakan sistem autentikasi, manaj
 
 ## Pattern Project
 
-Pattern yang biasa saya gunakan adalah menggunakan Modular Architecture, dengan konsep OOP jadi saya biasa menggunakan fitur module pattern dari behaviornya nestjs
+Pattern yang biasa saya gunakan adalah menggunakan Modular Architecture, dengan konsep OOP jadi saya biasa menggunakan fitur module pattern dari behaviornya nestjs, alasan saya memilih pattern ini adalah keungguluannya di readbility dan maintainbility, menurut saya sangat mudah untuk menemukan route dari setiap endpoint yang terbuat
 
 ## Dokumentasi Architecture
 
