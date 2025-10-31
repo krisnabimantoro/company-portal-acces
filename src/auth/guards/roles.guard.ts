@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 @Injectable()
@@ -19,6 +15,11 @@ export class RolesGuard implements CanActivate {
     if (!user) {
       return false;
     }
-    return roles.includes(user.role);
+
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.some((roleName) => roles.includes(roleName));
+    }
+
+    return false;
   }
 }
